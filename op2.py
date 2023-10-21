@@ -1,10 +1,15 @@
 import socket
-import threading
 
 listen_port = 12345
 op1_ip = "192.168.0.64"
 op3_ip = "192.168.0.25"
-received_msg = ""
+
+def forward_message(target_ip, message):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((target_ip, listen_port))
+    client_socket.send(message.encode())
+    client_socket.close()
+    print(f"Sent: {message} to {target_ip}")
 
 def server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,28 +22,10 @@ def server():
         print("Accepted connection from", client_address)
         data = client_socket.recv(1024)
         if data:
-            global received_msg
             received_msg = data.decode()
             print("Received:", received_msg)
+            target_ip = op3_ip if client_address[0] == op1_ip else op1_ip
+            forward_message(target_ip, received_msg)  # Automatically forward the message
         client_socket.close()
 
-def forward_message(target_ip):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((target_ip, listen_port))
-    client_socket.send(received_msg.encode())
-    client_socket.close()
-    print(f"Sent: {received_msg} to {target_ip}")
-
-def user_interface():
-    while True:
-        user_choice = input("Enter '1' to forward message to op1, '3' to forward message to op3, or 'r' to receive messages: ").lower()
-        if user_choice == '1':
-            forward_message(op1_ip)
-        elif user_choice == '3':
-            forward_message(op3_ip)
-        elif user_choice == 'r':
-            server_thread = threading.Thread(target=server)
-            server_thread.start()
-            break  # Server will run indefinitely
-
-user_interface()
+server()  # Automatically start in receive mode
