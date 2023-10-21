@@ -2,8 +2,8 @@ import socket
 import threading
 
 listen_port = 12345
-op1_ip = "192.168.0.11"
-op3_ip = "192.168.0.13"
+op1_ip = "192.168.0.64"
+op3_ip = "192.168.0.25"
 received_msg = ""
 
 def server():
