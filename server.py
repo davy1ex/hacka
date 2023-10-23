@@ -1,19 +1,31 @@
 import socket
+import matplotlib.pyplot as plt
+import numpy as np
 
-def main():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', 12345))  # Слушаем на всех доступных интерфейсах
-    server_socket.listen()
+# Создание сокета
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('0.0.0.0', 65432))
+server_socket.listen()
 
-    print("Ожидание подключения...")
-    client_socket, client_address = server_socket.accept()
-    print(f"Подключение от {client_address}")
+print('Ожидание соединения...')
+conn, addr = server_socket.accept()
+print(f'Соединение с {addr}')
 
-    data = client_socket.recv(1024)
-    print(f"Получено: {data.decode()}")
+values = []  # Список для хранения полученных значений
 
-    client_socket.close()
-    server_socket.close()
+with conn:
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break  # Выход из цикла, если данные не поступают
+        value = float(data.decode().strip())
+        print('getted', value)
+        values.append(value)
 
-if __name__ == "__main__":
-    main()
+# Построение графика
+if values:
+    x = np.arange(len(values))
+    plt.plot(x, values)
+    plt.show()
+
+server_socket.close()
